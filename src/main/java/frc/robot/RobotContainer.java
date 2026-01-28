@@ -32,10 +32,10 @@ public class RobotContainer {
                     driveSub.drive(speed, rotation);
                 }, 
             driveSub));
-        controller.circle().onTrue(new DriveMetersCommand(1, driveSub));
+        controller.circle().onTrue(new DriveMetersCommand(2, driveSub));
     }
 
     public Command getAutonomousCommand() {
-        return new DriveMetersCommand(1, driveSub);
+        return new DriveMetersCommand(2, driveSub);
     }
 }

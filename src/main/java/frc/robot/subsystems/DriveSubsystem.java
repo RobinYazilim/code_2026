@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -66,7 +67,7 @@ public class DriveSubsystem extends SubsystemBase {
         leftFollowerConfig.follow(leftLeader);
         rightFollowerConfig.follow(rightLeader);
 
-        leftLeaderConfig.inverted(true);
+        rightLeaderConfig.inverted(true);
 
         leftLeader.configure(leftLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         rightLeader.configure(rightLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -93,6 +94,10 @@ public class DriveSubsystem extends SubsystemBase {
         wheels.rightMeters = rightEncoder.getPosition() * Measurements.metersPerMotorRotation;
 
         estimator.update(new Rotation2d(), wheels);
+
+        SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
+        SmartDashboard.putNumber("Drive/Right Meters", wheels.rightMeters);
+        SmartDashboard.putNumber("Drive/AVG Meters", (wheels.leftMeters + wheels.rightMeters)/(double)2);
     }
 
     public void drive(double forward, double rotation)
@@ -104,4 +109,5 @@ public class DriveSubsystem extends SubsystemBase {
     {
         return (wheels.leftMeters + wheels.rightMeters)/2;
     }
+
 }

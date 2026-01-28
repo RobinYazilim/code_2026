@@ -17,7 +17,7 @@ public class Constants {
         public static final double distBetweenWheels = 0.6767;
         public static final double wheelDiameter = 0.1524;
         public static final double wheelCircumference = wheelDiameter * Math.PI;
-        public static final double gearRatio = 4;
+        public static final double gearRatio = 8.45;
         public static final double metersPerMotorRotation = wheelCircumference/gearRatio;
     }
 
