@@ -13,6 +13,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -81,8 +82,8 @@ public class DriveSubsystem extends SubsystemBase {
         drive = new DifferentialDrive(leftLeader, rightLeader);
         kinematics = new DifferentialDriveKinematics(Measurements.distBetweenWheels);
         wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition(), rightEncoder.getPosition());
-        pose = new Pose2d(0, 0, null);
-        estimator = new DifferentialDrivePoseEstimator(kinematics, null, wheels.leftMeters, wheels.rightMeters, pose);
+        pose = new Pose2d(0, 0, new Rotation2d());
+        estimator = new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(), wheels.leftMeters, wheels.rightMeters, pose);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class DriveSubsystem extends SubsystemBase {
         wheels.leftMeters = leftEncoder.getPosition() * Measurements.metersPerMotorRotation;
         wheels.rightMeters = rightEncoder.getPosition() * Measurements.metersPerMotorRotation;
 
-        estimator.update(null, wheels);
+        estimator.update(new Rotation2d(), wheels);
     }
 
     public void drive(double forward, double rotation)
