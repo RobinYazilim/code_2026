@@ -20,4 +20,8 @@ public class Constants {
         public static final double gearRatio = 4;
         public static final double metersPerMotorRotation = wheelCircumference/gearRatio;
     }
+
+    public static final class IDs {
+        public static final int controllerPort = 0;
+    }
 }
