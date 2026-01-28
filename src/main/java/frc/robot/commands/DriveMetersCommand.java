@@ -17,7 +17,8 @@ public class DriveMetersCommand extends Command {
         this.driveSub = driveSub;
 
         addRequirements(driveSub);
-
+// https://docs.wpilib.org/en/2020/docs/software/advanced-control/introduction/tuning-pid-controller.html
+//TODO linke bakın!!!
         pid = new PIDController(.5687, 0.74, 0);
         pid.setTolerance(0.02);
     }
