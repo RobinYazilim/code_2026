@@ -98,4 +98,9 @@ public class DriveSubsystem extends SubsystemBase {
     {
         drive.arcadeDrive(forward, rotation);
     }
+
+    public double getAverageMeters()
+    {
+        return (wheels.leftMeters + wheels.rightMeters)/2;
+    }
 }
