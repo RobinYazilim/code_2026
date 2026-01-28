@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
+import frc.robot.commands.DriveMetersCommand;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class RobotContainer {
@@ -31,6 +32,7 @@ public class RobotContainer {
                     driveSub.drive(speed, rotation);
                 }, 
             driveSub));
+        controller.circle().onTrue(new DriveMetersCommand(1, driveSub));
     }
 
     public Command getAutonomousCommand() {
