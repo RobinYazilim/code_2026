@@ -25,7 +25,7 @@ public class DriveMetersCommand extends Command {
 
         addRequirements(driveSub);
 
-        pid = new PIDController(.5, 0, 0.05);
+        pid = new PIDController(1, 0.04, 0.05);
         pid.setTolerance(0.03, 0.1);
     }
 
