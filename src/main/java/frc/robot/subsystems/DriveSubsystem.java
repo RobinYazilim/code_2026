@@ -16,8 +16,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -34,6 +35,11 @@ public class DriveSubsystem extends SubsystemBase {
     private final DifferentialDriveWheelPositions wheels;
     private final DifferentialDrivePoseEstimator estimator;
     private final Pose2d pose;
+
+    // log isi
+    private final DoubleLogEntry logLeft = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Left Meters");
+    private final DoubleLogEntry logRight = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Right Meters");
+    private final DoubleLogEntry logAverage = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Average Meters");
 
 
     public DriveSubsystem()
@@ -95,9 +101,12 @@ public class DriveSubsystem extends SubsystemBase {
 
         estimator.update(new Rotation2d(), wheels);
 
-        SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
-        SmartDashboard.putNumber("Drive/Right Meters", wheels.rightMeters);
-        SmartDashboard.putNumber("Drive/AVG Meters", (wheels.leftMeters + wheels.rightMeters)/(double)2);
+        //SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
+        //SmartDashboard.putNumber("Drive/Right Meters", wheels.rightMeters);
+        //SmartDashboard.putNumber("Drive/AVG Meters", (wheels.leftMeters + wheels.rightMeters)/(double)2);
+        logLeft.append(wheels.leftMeters);
+        logRight.append(wheels.rightMeters);
+        logAverage.append(getAverageMeters());
     }
 
     public void drive(double forward, double rotation)
