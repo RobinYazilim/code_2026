@@ -13,8 +13,7 @@ import frc.robot.Constants.Motors;
 public class IntakeSubsystem extends SubsystemBase {
     private final SparkMax intakeMotor;
 
-    public IntakeSubsystem()
-    {
+    public IntakeSubsystem() {
         intakeMotor = new SparkMax(Motors.intakeMotorID, MotorType.kBrushed);
         SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
