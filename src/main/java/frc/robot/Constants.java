@@ -8,7 +8,8 @@ public class Constants {
         public static final int rightFollowerID = 8;
 
         public static final int intakeMotorID = 0;
-        public static final int shooterMotor1ID = 0;
+        public static final int shooterMotorID = 0;
+        public static final int shooterMotor1ID = 0; //çıkarazac errorler yüzünden geri koydum
         public static final int shooterMotor2ID = 0;
     }
 
