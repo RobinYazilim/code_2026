@@ -15,7 +15,7 @@ public class BallSubsystem extends SubsystemBase {
     private final SparkMax intakeMotor;
 
     public BallSubsystem() {
-        shooterMotor = new SparkMax(Motors.shooterMotorID, MotorType.kBrushless)
+        shooterMotor = new SparkMax(Motors.shooterMotorID, MotorType.kBrushless);
         intakeMotor = new SparkMax(Motors.intakeMotorID, MotorType.kBrushed);
         SparkMaxConfig shooterMotorConfig = new SparkMaxConfig();
         SparkMaxConfig intakeMotorConfig = new SparkMaxConfig();
