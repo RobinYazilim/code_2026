@@ -6,9 +6,9 @@ import frc.robot.Constants.Motors;
 /* kitbot'da burayı import static yapmislar.
 + drive constants shooter constants diye ayırsak daha rahat olmaz mı? */
 
-import com.revrobotics.PersistMode; // kitbot'da com.revrobotics.spark.SparkBase.PersistMode yapmislar.
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.ResetMode; //ayni sekilde com.revrobotics.spark.SparkBase.ResetMode yapmislar.
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -92,20 +92,6 @@ public class DriveSubsystem extends SubsystemBase {
         wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition(), rightEncoder.getPosition());
         pose = new Pose2d(0, 0, new Rotation2d());
         estimator = new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(), wheels.leftMeters, wheels.rightMeters, pose);
-
-        /* SparkMaxConfig config = new SparkMaxConfig(); 
-        config.voltageCompensation(12);
-        config.smartCurrentLimit(DRIVE_MOTOR_CURRENT_LIMIT); */ //diyooooo
-        
-        /* config.follow(leftLeader);
-        leftFollower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        config.follow(rightLeader);
-        rightFollower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        
-        config.disableFollowerMode();
-        rightLeader.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        config.inverted(true);
-        leftLeader.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters); */ //yazıyodu ama commentliydi
     }
 
     @Override
@@ -128,9 +114,24 @@ public class DriveSubsystem extends SubsystemBase {
         drive.arcadeDrive(forward, rotation);
     }
 
+    public void tankDrive(double left, double right)
+    {
+        drive.tankDrive(left, right);
+    }
+
     public double getAverageMeters()
     {
         return (wheels.leftMeters + wheels.rightMeters)/2;
+    }
+
+    public double getLeftMeters()
+    {
+        return wheels.leftMeters;
+    }
+
+    public double getRightMeters()
+    {
+        return wheels.rightMeters;
     }
 
 }

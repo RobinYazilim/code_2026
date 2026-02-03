@@ -4,20 +4,25 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+//import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
 import frc.robot.commands.DriveMetersCommand;
+//import frc.robot.subsystems.BallSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class RobotContainer {
     private final DriveSubsystem driveSub;
+    //private final BallSubsystem ballSub;
     private final CommandPS4Controller controller;
 
     public RobotContainer() {
         driveSub = new DriveSubsystem();
+        //ballSub = new BallSubsystem();
         controller = new CommandPS4Controller(IDs.controllerPort);
 
         configureBindings();
@@ -28,7 +33,10 @@ public class RobotContainer {
             new RunCommand(
                 () -> {
                     double speed = -controller.getLeftY();
-                    double rotation = controller.getRightX();
+                    double rotation = -controller.getRightX();
+
+                    speed = MathUtil.applyDeadband(speed, 0.1);
+                    rotation = MathUtil.applyDeadband(rotation, 0.1);
 
                     speed *= Limits.joystickSpeedLimit;
                     rotation *= Limits.joystickSpeedLimit;
@@ -36,12 +44,26 @@ public class RobotContainer {
                     driveSub.drive(speed, rotation);
                 },
             driveSub));
-        
-        controller.circle().onTrue(new DriveMetersCommand(2, driveSub));
-    }
+        /*
+        controller.circle().whileTrue(
+            new StartEndCommand(
+                () -> ballSub.runShooter(Limits.clampSpeedLimit),
+                () -> ballSub.runShooter(0),
+                ballSub
+                )
+                );
+                
+                controller.square().whileTrue(
+                    new StartEndCommand(
+                        () -> ballSub.runIntake(Limits.clampSpeedLimit),
+                        () -> ballSub.runIntake(0),
+                        ballSub
+                        )
+                        );
+                        */
+                    }
 
     public Command getAutonomousCommand() {
         return new DriveMetersCommand(2, driveSub);
     }
 }
- //apply deadband yapcaz!!
