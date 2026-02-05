@@ -29,4 +29,19 @@ public class Constants {
     public static final class IDs {
         public static final int controllerPort = 0;
     }
+
+    public static final class FuelConstants {
+    public static final int FEEDER_MOTOR_ID = 22;
+    public static final int INTAKE_LAUNCHER_MOTOR_ID = 1;
+
+    public static final int FEEDER_MOTOR_CURRENT_LIMIT = 60;
+    public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 60;
+
+    public static final double INTAKING_FEEDER_VOLTAGE = -12;
+    public static final double INTAKING_INTAKE_VOLTAGE = 10;
+    public static final double LAUNCHING_FEEDER_VOLTAGE = 9;
+    public static final double LAUNCHING_LAUNCHER_VOLTAGE = 10.6;
+    public static final double SPIN_UP_FEEDER_VOLTAGE = -6;
+    public static final double SPIN_UP_SECONDS = 1;
+  }
 }

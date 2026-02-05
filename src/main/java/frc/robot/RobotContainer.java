@@ -12,17 +12,22 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
 import frc.robot.commands.DriveMetersCommand;
+import frc.robot.commands.Eject;
+import frc.robot.commands.Intake;
+import frc.robot.commands.Launch;
+import frc.robot.subsystems.BallSubsystem;
 //import frc.robot.subsystems.BallSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class RobotContainer {
     private final DriveSubsystem driveSub;
-    //private final BallSubsystem ballSub;
+    private final BallSubsystem ballSub;
     private final CommandPS4Controller controller;
+
 
     public RobotContainer() {
         driveSub = new DriveSubsystem();
-        //ballSub = new BallSubsystem();
+        ballSub = new BallSubsystem();
         controller = new CommandPS4Controller(IDs.controllerPort);
 
         configureBindings();
@@ -61,6 +66,18 @@ public class RobotContainer {
                         )
                         );
                         */
+
+
+                            
+    controller.L1().whileTrue(new Intake(ballSub));
+
+    controller.R1().whileTrue(new Eject(ballSub));
+    
+    controller.R2().whileTrue(new Launch(ballSub));
+
+    //controller.square().whileTrue(new Eject(BallSubsystem));
+
+    //BallSubsystem.setDefaultCommand(BallSubsystem.run(() -> BallSubsystem.stop()));
                     }
 
     public Command getAutonomousCommand() {
