@@ -59,8 +59,8 @@ public class DriveMetersCommand extends Command {
         double leftOutput = pidLeft.calculate(left, meters);
         double rightOutput = pidLeft.calculate(right, meters);
 
-        leftOutput = MathUtil.clamp(leftOutput, -Limits.clampSpeedLimit, Limits.clampSpeedLimit);
-        rightOutput = MathUtil.clamp(rightOutput, -Limits.clampSpeedLimit, Limits.clampSpeedLimit);
+        leftOutput = MathUtil.clamp(leftOutput, -Limits.clampDriveSpeedLimit, Limits.clampDriveSpeedLimit);
+        rightOutput = MathUtil.clamp(rightOutput, -Limits.clampDriveSpeedLimit, Limits.clampDriveSpeedLimit);
 
         driveSub.tankDrive(leftOutput, rightOutput);
         logSetpoint.append(meters);

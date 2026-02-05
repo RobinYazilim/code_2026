@@ -7,14 +7,13 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 //import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
 import frc.robot.commands.DriveMetersCommand;
-import frc.robot.commands.Eject;
-import frc.robot.commands.Intake;
-import frc.robot.commands.Launch;
+
 import frc.robot.subsystems.BallSubsystem;
 //import frc.robot.subsystems.BallSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -49,31 +48,36 @@ public class RobotContainer {
                     driveSub.drive(speed, rotation);
                 },
             driveSub));
-        /*
-        controller.circle().whileTrue(
+        
+        controller.L1().whileTrue(
             new StartEndCommand(
-                () -> ballSub.runShooter(Limits.clampSpeedLimit),
+                () -> ballSub.runShooter(Limits.clampShootSpeedLimit),
                 () -> ballSub.runShooter(0),
                 ballSub
                 )
-                );
+            );
                 
-                controller.square().whileTrue(
-                    new StartEndCommand(
-                        () -> ballSub.runIntake(Limits.clampSpeedLimit),
-                        () -> ballSub.runIntake(0),
-                        ballSub
-                        )
-                        );
-                        */
+        controller.R1().whileTrue(
+            new StartEndCommand(
+                () -> ballSub.runIntake(-Limits.clampIntakeSpeedLimit),
+                () -> ballSub.runIntake(0),
+                ballSub
+                )
+            );
+
+        controller.R2().whileTrue(
+            new StartEndCommand(
+                () -> ballSub.runIntake(Limits.clampIntakeSpeedLimit),
+                () -> ballSub.runIntake(0),
+                ballSub
+                )
+            );
+                    
 
 
                             
-    controller.L1().whileTrue(new Intake(ballSub));
+   
 
-    controller.R1().whileTrue(new Eject(ballSub));
-    
-    controller.R2().whileTrue(new Launch(ballSub));
 
     //controller.square().whileTrue(new Eject(BallSubsystem));
 

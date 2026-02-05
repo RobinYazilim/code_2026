@@ -30,9 +30,10 @@ public class BallSubsystem extends SubsystemBase {
         intakeMotor.configure(intakeMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public void runShooter(double speed) {
+    public void runShooter(double speed) {        
+        
         shooterMotor.set(-speed); 
-        intakeMotor.set(-speed);
+        intakeMotor.set(speed);
     }
     
     public void runIntake(double speed) {
