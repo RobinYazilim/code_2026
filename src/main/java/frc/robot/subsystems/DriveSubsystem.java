@@ -6,6 +6,10 @@ import frc.robot.Constants.Motors;
 /* kitbot'da burayı import static yapmislar.
 + drive constants shooter constants diye ayırsak daha rahat olmaz mı? */
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPLTVController;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -16,10 +20,16 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -31,6 +41,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final RelativeEncoder leftEncoder;
     private final RelativeEncoder rightEncoder;
+    
+    private final ADXRS450_Gyro gyro;
 
     private final DifferentialDrive drive;
     private final DifferentialDriveKinematics kinematics;
@@ -55,6 +67,8 @@ public class DriveSubsystem extends SubsystemBase {
 
         leftEncoder.setPosition(0);
         rightEncoder.setPosition(0);
+
+        gyro = new ADXRS450_Gyro();
 
         SparkMaxConfig leftLeaderConfig = new SparkMaxConfig();
         SparkMaxConfig rightLeaderConfig = new SparkMaxConfig();
@@ -90,8 +104,45 @@ public class DriveSubsystem extends SubsystemBase {
         drive = new DifferentialDrive(leftLeader, rightLeader);
         kinematics = new DifferentialDriveKinematics(Measurements.distBetweenWheels);
         wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition(), rightEncoder.getPosition());
-        pose = new Pose2d(0, 0, new Rotation2d());
-        estimator = new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(), wheels.leftMeters, wheels.rightMeters, pose);
+        pose = new Pose2d(0, 0, new Rotation2d(gyro.getAngle()));
+        estimator = new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(gyro.getAngle()), wheels.leftMeters, wheels.rightMeters, pose);
+
+        /*
+        
+        ModuleConfig moduleConfig = new ModuleConfig(
+            Measurements.wheelDiameter / 2.0,
+            Limits.maxPhysicalSpeedMetersPerSecond,
+            1.2,
+            DCMotor.getNEO(2),
+            Measurements.gearRatio,
+            Limits.motorCurrentLimit
+        );
+
+        RobotConfig config = new RobotConfig(
+            30.0,
+            Measurements.momentOfInertia,
+            moduleConfig,
+            Measurements.distBetweenWheels
+        );
+
+        AutoBuilder.configure(
+            this::getPose, 
+            this::resetPose, 
+            this::getRobotRelativeSpeeds, 
+            (speeds, feedforwards) -> driveRobotRelative(speeds), 
+            new PPLTVController(0.02), 
+            config, 
+            () -> {
+                var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                    return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+            },
+            this
+        );
+        
+         */
     }
 
     @Override
@@ -99,11 +150,8 @@ public class DriveSubsystem extends SubsystemBase {
         wheels.leftMeters = leftEncoder.getPosition() * Measurements.metersPerMotorRotation;
         wheels.rightMeters = rightEncoder.getPosition() * Measurements.metersPerMotorRotation;
 
-        estimator.update(new Rotation2d(), wheels);
+        estimator.update(Rotation2d.fromDegrees(gyro.getAngle()), wheels);
 
-        //SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
-        //SmartDashboard.putNumber("Drive/Right Meters", wheels.rightMeters);
-        //SmartDashboard.putNumber("Drive/AVG Meters", (wheels.leftMeters + wheels.rightMeters)/(double)2);
         logLeft.append(wheels.leftMeters);
         logRight.append(wheels.rightMeters);
         logAverage.append(getAverageMeters());
@@ -134,4 +182,55 @@ public class DriveSubsystem extends SubsystemBase {
         return wheels.rightMeters;
     }
 
+    public double getGyroValue()
+    {
+        return gyro.getAngle();
+    }
+
+    // BUNLARI ASLA SILMEYIN VE ISIMLERINI DEGISTIRMEYIN PATHPLANNER ICIN GEREKLI
+    public Pose2d getPose()
+    {
+        return estimator.getEstimatedPosition();
+    }
+
+    public void resetPose(Pose2d newPose)
+    {
+        leftEncoder.setPosition(0);
+        rightEncoder.setPosition(0);
+
+        wheels.leftMeters = 0;
+        wheels.rightMeters = 0;
+
+        gyro.reset();
+
+        estimator.resetPosition(
+            Rotation2d.fromDegrees(gyro.getAngle()), wheels, newPose);
+    }
+
+    public ChassisSpeeds getRobotRelativeSpeeds()
+    {
+        double leftVelocityRPM = leftEncoder.getVelocity();
+        double rightVelocityRPM = rightEncoder.getVelocity();
+
+        double leftVelocityMetersPerSec = (leftVelocityRPM / 60.0) * Measurements.metersPerMotorRotation;
+        double rightVelocityMetersPerSec = (rightVelocityRPM / 60.0) * Measurements.metersPerMotorRotation;
+
+        DifferentialDriveWheelSpeeds wheelSpeeds = new DifferentialDriveWheelSpeeds(leftVelocityMetersPerSec, rightVelocityMetersPerSec);
+
+        return kinematics.toChassisSpeeds(wheelSpeeds);
+    }
+
+    public void driveRobotRelative(ChassisSpeeds chassisSpeeds)
+    {
+        DifferentialDriveWheelSpeeds targetWheelSpeeds = kinematics.toWheelSpeeds(chassisSpeeds);
+
+        double leftVolts = (targetWheelSpeeds.leftMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
+        double rightVolts = (targetWheelSpeeds.rightMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
+
+
+        leftLeader.setVoltage(leftVolts);
+        rightLeader.setVoltage(rightVolts);
+
+        drive.feed();
+    }
 }

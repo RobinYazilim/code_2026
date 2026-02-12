@@ -20,8 +20,10 @@ public class DriveMetersCommand extends Command {
 
     private final DoubleLogEntry logSetpoint = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Setpoint");
 
+    double angle = 0;
 
-    public DriveMetersCommand(double meters, DriveSubsystem driveSub)
+
+    public DriveMetersCommand(double meters, boolean lockAngle, DriveSubsystem driveSub)
     {
         this.meters = meters;
         this.driveSub = driveSub;
@@ -32,6 +34,9 @@ public class DriveMetersCommand extends Command {
         double ki = 1;
         //0.0205
         double kd = 0.15;
+
+        if (lockAngle)
+            angle = driveSub.getGyroValue();
 
         pidLeft = new PIDController(kp, ki, kd);
         pidRight = new PIDController(kp, ki, kd);
@@ -55,9 +60,10 @@ public class DriveMetersCommand extends Command {
     {
         double left = driveSub.getLeftMeters() - leftStartMeters;
         double right = driveSub.getRightMeters() - rightStartMeters;
+        double rotation = driveSub.getGyroValue() - angle;
 
-        double leftOutput = pidLeft.calculate(left, meters);
-        double rightOutput = pidLeft.calculate(right, meters);
+        double leftOutput = pidLeft.calculate(left, meters) + rotation;
+        double rightOutput = pidRight.calculate(right, meters) - rotation;
 
         leftOutput = MathUtil.clamp(leftOutput, -Limits.clampDriveSpeedLimit, Limits.clampDriveSpeedLimit);
         rightOutput = MathUtil.clamp(rightOutput, -Limits.clampDriveSpeedLimit, Limits.clampDriveSpeedLimit);

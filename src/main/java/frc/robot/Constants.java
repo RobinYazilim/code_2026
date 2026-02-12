@@ -18,6 +18,8 @@ public class Constants {
         public static final double clampShootSpeedLimit = 0.95;
         public static final double clampIntakeSpeedLimit = 0.45;
 
+        public static final double maxPhysicalSpeedMetersPerSecond = 3.5;
+
         public static final double joystickSpeedLimit = 0.6;
     }
 
@@ -27,6 +29,11 @@ public class Constants {
         public static final double wheelCircumference = wheelDiameter * Math.PI;
         public static final double gearRatio = 8.45;
         public static final double metersPerMotorRotation = wheelCircumference/gearRatio;
+
+        public static final double momentOfInertia = 2.8;
+        
+
+
     }
 
     public static final class IDs {
