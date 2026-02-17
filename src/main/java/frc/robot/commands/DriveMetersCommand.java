@@ -20,8 +20,7 @@ public class DriveMetersCommand extends Command {
 
     private final DoubleLogEntry logSetpoint = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Setpoint");
 
-    double angle = 0;
-
+    double angle = 0;                                                                                                                                                                                           
 
     public DriveMetersCommand(double meters, boolean lockAngle, DriveSubsystem driveSub)
     {
