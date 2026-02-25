@@ -15,7 +15,7 @@ public class Constants {
         public static final int voltageLimit = 12;
         public static final int motorCurrentLimit = 40;
         public static final double clampDriveSpeedLimit = 0.45;
-        public static final double clampShootSpeedLimit = 0.95;
+        public static final double clampShootSpeedLimit = 0.85;
         public static final double clampIntakeSpeedLimit = 0.45;
 
         public static final double maxPhysicalSpeedMetersPerSecond = 3.5;
@@ -31,27 +31,10 @@ public class Constants {
         public static final double metersPerMotorRotation = wheelCircumference/gearRatio;
 
         public static final double momentOfInertia = 2.8;
-        
-
 
     }
 
     public static final class IDs {
         public static final int controllerPort = 0;
     }
-
-    public static final class FuelConstants {
-    public static final int FEEDER_MOTOR_ID = 22;
-    public static final int INTAKE_LAUNCHER_MOTOR_ID = 1;
-
-    public static final int FEEDER_MOTOR_CURRENT_LIMIT = 40;
-    public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 40;
-
-    public static final double INTAKING_FEEDER_VOLTAGE = -12;
-    public static final double INTAKING_INTAKE_VOLTAGE = 10;
-    public static final double LAUNCHING_FEEDER_VOLTAGE = 12;
-    public static final double LAUNCHING_LAUNCHER_VOLTAGE = 12;
-    public static final double SPIN_UP_FEEDER_VOLTAGE = -6;
-    public static final double SPIN_UP_SECONDS = 1;
-  }
 }

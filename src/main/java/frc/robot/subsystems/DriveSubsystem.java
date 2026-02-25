@@ -17,6 +17,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,7 +26,6 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -107,15 +107,16 @@ public class DriveSubsystem extends SubsystemBase {
         pose = new Pose2d(0, 0, new Rotation2d(gyro.getAngle()));
         estimator = new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(gyro.getAngle()), wheels.leftMeters, wheels.rightMeters, pose);
 
-        /*
+        DCMotor driveMotor = DCMotor.getNEO(2);
+        driveMotor.withReduction(Measurements.gearRatio);
         
         ModuleConfig moduleConfig = new ModuleConfig(
             Measurements.wheelDiameter / 2.0,
             Limits.maxPhysicalSpeedMetersPerSecond,
             1.2,
-            DCMotor.getNEO(2),
-            Measurements.gearRatio,
-            Limits.motorCurrentLimit
+            driveMotor,
+            Limits.motorCurrentLimit,
+            2
         );
 
         RobotConfig config = new RobotConfig(
@@ -142,7 +143,6 @@ public class DriveSubsystem extends SubsystemBase {
             this
         );
         
-         */
     }
 
     @Override
@@ -227,6 +227,8 @@ public class DriveSubsystem extends SubsystemBase {
         double leftVolts = (targetWheelSpeeds.leftMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
         double rightVolts = (targetWheelSpeeds.rightMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
 
+        leftVolts = MathUtil.clamp(leftVolts, -Limits.voltageLimit, Limits.voltageLimit);
+        rightVolts = MathUtil.clamp(rightVolts, -Limits.voltageLimit, Limits.voltageLimit);
 
         leftLeader.setVoltage(leftVolts);
         rightLeader.setVoltage(rightVolts);

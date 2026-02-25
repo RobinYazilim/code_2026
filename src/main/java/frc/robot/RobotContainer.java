@@ -4,7 +4,12 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -21,13 +26,32 @@ public class RobotContainer {
     private final BallSubsystem ballSub;
     private final CommandPS4Controller controller;
 
+    private final PathPlannerAuto auto;
+    private final SendableChooser<Command> autoChooser;
+
+
 
     public RobotContainer() {
+        boolean isCompetition = true;
+
         driveSub = new DriveSubsystem();
         ballSub = new BallSubsystem();
         controller = new CommandPS4Controller(IDs.controllerPort);
 
+        autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier(
+        (stream) -> isCompetition
+            ? stream.filter(auto -> auto.getName().startsWith("comp"))
+            : stream
+        );
+        
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+
         configureBindings();
+        auto = loadAutos();
+    }
+
+    private PathPlannerAuto loadAutos() {
+        return new PathPlannerAuto("avto");
     }
 
     private void configureBindings() {
@@ -73,6 +97,14 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
+        if (autoChooser != null)
+        {
+            return autoChooser.getSelected();
+        }
+        if (auto != null)
+        {
+            return auto;
+        }
         return new DriveMetersCommand(2, true, driveSub);
     }
 }
