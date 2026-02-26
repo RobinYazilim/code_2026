@@ -2,14 +2,18 @@ package frc.robot;
 
 public class Constants {
     public static final class Motors {
-        // TODO: idleri degistir
-        public static final int leftFrontID = 1;
-        public static final int leftBackID = 2;
-        public static final int rightFrontID = 3;
-        public static final int rightBackID = 4;
+        // TODO: idleri degistir 
+        // 1 KOYMAYIN ONEMLI ISLER BOZULUYO (2010lular anlar)
+        public static final int leftFrontID = 2;
+        public static final int leftBackID = 3;
+        public static final int rightFrontID = 4;
+        public static final int rightBackID = 5;
 
-        public static final int intakeMotorID = 1;
-        public static final int shooterMotorID = 22;
+        public static final int intakeperfectdaire = 6;
+        public static final int intakeperfectsilindir = 7;
+
+        public static final int keremdeniz = 8;
+        public static final int john = 9;
     }
 
     public static final class Limits {

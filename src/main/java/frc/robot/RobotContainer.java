@@ -14,17 +14,21 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
 
-import frc.robot.subsystems.BallSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 
 public class RobotContainer {
     private final DriveSubsystem driveSub;
-    private final BallSubsystem ballSub;
+    private final IntakeSubsystem ballSub;
+    private final ShooterSubsystem shoot;
+
     private final CommandPS4Controller controller;
 
     public RobotContainer() {
-        driveSub = new DriveSubsystem();
-        ballSub = new BallSubsystem();
+        drℹ️veSub = new DriveSubsystem();
+        ballSub = new IntakeSubsystem();
+        shoot = new ShooterSubsystem();
         controller = new CommandPS4Controller(IDs.controllerPort);
 
         configureBindings();
@@ -52,30 +56,32 @@ public class RobotContainer {
         
         controller.L1().whileTrue(
             new StartEndCommand(
-                () -> ballSub.runShooter(Limits.clampShootSpeedLimit),
-                () -> ballSub.runShooter(0),
-                ballSub
+                () -> shoot.shoot(Limits.clampShootSpeedLimit),
+                () -> shoot.shoot(0),
+                shoot
                 )
             );
                 
         controller.R1().whileTrue(
             new StartEndCommand(
-                () -> ballSub.runIntake(-Limits.clampIntakeSpeedLimit),
-                () -> ballSub.runIntake(0),
+                () -> ballSub.spinIntake(-Limits.clampIntakeSpeedLimit),
+                () -> ballSub.spinIntake(0),
                 ballSub
                 )
             );
 
         controller.R2().whileTrue(
             new StartEndCommand(
-                () -> ballSub.runIntake(Limits.clampIntakeSpeedLimit),
-                () -> ballSub.runIntake(0),
+                () -> ballSub.moveIntake(Limits.clampIntakeSpeedLimit),
+                () -> ballSub.moveIntake(0),
                 ballSub
                 )
-            );
+            );// ALLLAAAAHH PEYGAMBER ===yupiiiiiiiii
+
     }
 
     public Command getAutonomousCommand() {
-        return null;
+        return null; //where ou nooo
+        // 
     }
 }
