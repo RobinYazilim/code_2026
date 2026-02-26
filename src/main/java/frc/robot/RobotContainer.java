@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
-import frc.robot.commands.DriveMetersCommand;
 
 import frc.robot.subsystems.BallSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -26,48 +22,31 @@ public class RobotContainer {
     private final BallSubsystem ballSub;
     private final CommandPS4Controller controller;
 
-    private final PathPlannerAuto auto;
-    private final SendableChooser<Command> autoChooser;
-
-
-
     public RobotContainer() {
-        boolean isCompetition = true;
-
         driveSub = new DriveSubsystem();
         ballSub = new BallSubsystem();
         controller = new CommandPS4Controller(IDs.controllerPort);
 
-        autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier(
-        (stream) -> isCompetition
-            ? stream.filter(auto -> auto.getName().startsWith("comp"))
-            : stream
-        );
-        
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-
         configureBindings();
-        auto = loadAutos();
-    }
-
-    private PathPlannerAuto loadAutos() {
-        return new PathPlannerAuto("avto");
     }
 
     private void configureBindings() {
         driveSub.setDefaultCommand(
             new RunCommand(
                 () -> {
-                    double speed = -controller.getLeftY();
-                    double rotation = -controller.getRightX();
+                    double xSpeed = controller.getLeftX();
+                    double ySpeed = controller.getLeftY();
+                    double rotation = controller.getRightX();
 
-                    speed = MathUtil.applyDeadband(speed, 0.1);
+                    xSpeed = MathUtil.applyDeadband(xSpeed, 0.1);
+                    ySpeed = MathUtil.applyDeadband(ySpeed, 0.1);
                     rotation = MathUtil.applyDeadband(rotation, 0.1);
 
-                    speed *= Limits.joystickSpeedLimit;
+                    xSpeed *= Limits.joystickSpeedLimit;
+                    ySpeed *= Limits.joystickSpeedLimit;
                     rotation *= Limits.joystickSpeedLimit;
 
-                    driveSub.drive(speed, rotation);
+                    driveSub.drive(xSpeed, ySpeed, rotation);
                 },
             driveSub));
         
@@ -97,14 +76,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        if (autoChooser != null)
-        {
-            return autoChooser.getSelected();
-        }
-        if (auto != null)
-        {
-            return auto;
-        }
-        return new DriveMetersCommand(2, true, driveSub);
+        return null;
     }
 }
