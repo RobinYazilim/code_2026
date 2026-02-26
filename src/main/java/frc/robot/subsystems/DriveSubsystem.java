@@ -34,33 +34,16 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
-    private final SparkMax leftLeader;
-    private final SparkMax rightLeader;
-    private final SparkMax leftFollower;
-    private final SparkMax rightFollower;
-
-    private final RelativeEncoder leftEncoder;
-    private final RelativeEncoder rightEncoder;
+    private final SparkMax leftFront;
+    private final SparkMax rightFront;
+    private final SparkMax leftBack;
+    private final SparkMax rightBack;
     
-    private final ADXRS450_Gyro gyro;
-
-    private final DifferentialDrive drive;
-    private final DifferentialDriveKinematics kinematics;
-    private final DifferentialDriveWheelPositions wheels;
-    private final DifferentialDrivePoseEstimator estimator;
-    private final Pose2d pose;
-
-    // log isi
-    private final DoubleLogEntry logLeft = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Left Meters");
-    private final DoubleLogEntry logRight = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Right Meters");
-    private final DoubleLogEntry logAverage = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Average Meters");
-
-
     public DriveSubsystem() {
-        leftLeader = new SparkMax(Motors.leftLeaderID, MotorType.kBrushless);
-        rightLeader = new SparkMax(Motors.rightLeaderID, MotorType.kBrushless);
-        leftFollower = new SparkMax(Motors.leftFollowerID, MotorType.kBrushless);
-        rightFollower = new SparkMax(Motors.rightFollowerID, MotorType.kBrushless);
+        leftFront = new SparkMax(Motors.leftLeaderID, MotorType.kBrushless);
+        rightFront = new SparkMax(Motors.rightLeaderID, MotorType.kBrushless);
+        leftBack = new SparkMax(Motors.leftFollowerID, MotorType.kBrushless);
+        rightBack = new SparkMax(Motors.rightFollowerID, MotorType.kBrushless);
 
         leftEncoder = leftLeader.getEncoder();
         rightEncoder = rightLeader.getEncoder();

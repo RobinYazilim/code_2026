@@ -2,10 +2,11 @@ package frc.robot;
 
 public class Constants {
     public static final class Motors {
-        public static final int leftLeaderID = 7;
-        public static final int leftFollowerID = 28;
-        public static final int rightLeaderID = 16;
-        public static final int rightFollowerID = 8;
+        // TODO: idleri degistir
+        public static final int leftFrontID = 1;
+        public static final int leftBackID = 2;
+        public static final int rightFrontID = 3;
+        public static final int rightBackID = 4;
 
         public static final int intakeMotorID = 1;
         public static final int shooterMotorID = 22;
