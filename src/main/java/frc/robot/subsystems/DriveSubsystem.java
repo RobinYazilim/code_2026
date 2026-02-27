@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -54,7 +55,9 @@ public class DriveSubsystem extends SubsystemBase {
     private final DoubleLogEntry logLeft = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Left Meters");
     private final DoubleLogEntry logRight = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Right Meters");
     private final DoubleLogEntry logAverage = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Average Meters");
+    private final DoubleLogEntry logAngle = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Gyro Angle");
 
+    private double maxSpeed = 0.0;
 
     public DriveSubsystem() {
         leftLeader = new SparkMax(Motors.leftLeaderID, MotorType.kBrushless);
@@ -152,9 +155,31 @@ public class DriveSubsystem extends SubsystemBase {
 
         estimator.update(Rotation2d.fromDegrees(gyro.getAngle()), wheels);
 
+        double currentForwardSpeed = Math.abs(getRobotRelativeSpeeds().vxMetersPerSecond);
+        
+        // If we beat our high score, save it!
+        if (currentForwardSpeed > maxSpeed) {
+            maxSpeed = currentForwardSpeed;
+        }
+        SmartDashboard.putNumber("Drive/LIVE Speed (m_s)", currentForwardSpeed);
+        SmartDashboard.putNumber("Drive/MAX Speed (m_s)", maxSpeed);
+
         logLeft.append(wheels.leftMeters);
         logRight.append(wheels.rightMeters);
         logAverage.append(getAverageMeters());
+        logAngle.append(getAverageMeters());
+
+        SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
+        SmartDashboard.putNumber("Drive/Right Meters", wheels.rightMeters);
+        SmartDashboard.putNumber("Drive/Average Meters", getAverageMeters());
+        SmartDashboard.putNumber("Drive/Gyro Angle", gyro.getAngle());
+
+        Pose2d currentPose = getPose();
+        SmartDashboard.putNumberArray("Odometry/Robot Pose", new double[] {
+            currentPose.getX(),
+            currentPose.getY(),
+            currentPose.getRotation().getDegrees()
+        });
     }
 
     public void drive(double forward, double rotation)
@@ -185,6 +210,11 @@ public class DriveSubsystem extends SubsystemBase {
     public double getGyroValue()
     {
         return gyro.getAngle();
+    }
+
+    public void resetGyro()
+    {
+        gyro.reset();
     }
 
     // BUNLARI ASLA SILMEYIN VE ISIMLERINI DEGISTIRMEYIN PATHPLANNER ICIN GEREKLI
@@ -224,6 +254,7 @@ public class DriveSubsystem extends SubsystemBase {
     {
         DifferentialDriveWheelSpeeds targetWheelSpeeds = kinematics.toWheelSpeeds(chassisSpeeds);
 
+        targetWheelSpeeds.desaturate(Limits.maxPhysicalSpeedMetersPerSecond);
         double leftVolts = (targetWheelSpeeds.leftMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
         double rightVolts = (targetWheelSpeeds.rightMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
 

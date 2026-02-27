@@ -48,10 +48,19 @@ public class RobotContainer {
 
         configureBindings();
         auto = loadAutos();
+
+        SmartDashboard.putNumber("Tune-Dist_kP", 0.9);
+        SmartDashboard.putNumber("Tune-Dist_kI", 0.05);
+        SmartDashboard.putNumber("Tune-Dist_kD", 0.1);
+        
+        SmartDashboard.putNumber("Tune-Head_kP", 0.04);
+        SmartDashboard.putNumber("Tune-Head_kI", 0.0);
+        SmartDashboard.putNumber("Tune-Head_kD", 0.0);
+    
     }
 
     private PathPlannerAuto loadAutos() {
-        return new PathPlannerAuto("avto");
+        return new PathPlannerAuto("abc");
     }
 
     private void configureBindings() {
@@ -103,8 +112,9 @@ public class RobotContainer {
         }
         if (auto != null)
         {
+            System.err.println("got das auto");
             return auto;
         }
-        return new DriveMetersCommand(2, true, driveSub);
+        return new DriveMetersCommand(1, driveSub);
     }
 }

@@ -13,12 +13,12 @@ public class Constants {
 
     public static final class Limits {
         public static final int voltageLimit = 12;
-        public static final int motorCurrentLimit = 40;
-        public static final double clampDriveSpeedLimit = 0.45;
+        public static final int motorCurrentLimit = 64;
+        public static final double clampDriveSpeedLimit = 0.25;
         public static final double clampShootSpeedLimit = 0.85;
         public static final double clampIntakeSpeedLimit = 0.45;
 
-        public static final double maxPhysicalSpeedMetersPerSecond = 3.5;
+        public static final double maxPhysicalSpeedMetersPerSecond = 3.8;
 
         public static final double joystickSpeedLimit = 0.6;
     }
