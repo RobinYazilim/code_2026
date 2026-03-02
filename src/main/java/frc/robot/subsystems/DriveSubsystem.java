@@ -47,7 +47,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final DifferentialDrive drive;
     private final DifferentialDriveKinematics kinematics;
-    private final DifferentialDriveWheelPositions wheels;
+    //private final DifferentialDriveWheelPositions wheels;
     private final DifferentialDrivePoseEstimator estimator;
     private final Pose2d pose;
 
@@ -72,6 +72,8 @@ public class DriveSubsystem extends SubsystemBase {
         rightEncoder.setPosition(0);
 
         gyro = new ADXRS450_Gyro();
+        gyro.calibrate();
+        gyro.reset();
 
         SparkMaxConfig leftLeaderConfig = new SparkMaxConfig();
         SparkMaxConfig rightLeaderConfig = new SparkMaxConfig();
@@ -106,12 +108,11 @@ public class DriveSubsystem extends SubsystemBase {
 
         drive = new DifferentialDrive(leftLeader, rightLeader);
         kinematics = new DifferentialDriveKinematics(Measurements.distBetweenWheels);
-        wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition(), rightEncoder.getPosition());
+        DifferentialDriveWheelPositions wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition()*Measurements.metersPerMotorRotation, rightEncoder.getPosition()*Measurements.metersPerMotorRotation);
         pose = new Pose2d(0, 0, new Rotation2d(gyro.getAngle()));
         estimator = new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(gyro.getAngle()), wheels.leftMeters, wheels.rightMeters, pose);
 
-        DCMotor driveMotor = DCMotor.getNEO(2);
-        driveMotor.withReduction(Measurements.gearRatio);
+        DCMotor driveMotor = DCMotor.getNEO(2).withReduction(Measurements.gearRatio);
         
         ModuleConfig moduleConfig = new ModuleConfig(
             Measurements.wheelDiameter / 2.0,
@@ -150,14 +151,12 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        wheels.leftMeters = leftEncoder.getPosition() * Measurements.metersPerMotorRotation;
-        wheels.rightMeters = rightEncoder.getPosition() * Measurements.metersPerMotorRotation;
+        DifferentialDriveWheelPositions wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition() * Measurements.metersPerMotorRotation, rightEncoder.getPosition() * Measurements.metersPerMotorRotation);
 
         estimator.update(Rotation2d.fromDegrees(gyro.getAngle()), wheels);
 
         double currentForwardSpeed = Math.abs(getRobotRelativeSpeeds().vxMetersPerSecond);
         
-        // If we beat our high score, save it!
         if (currentForwardSpeed > maxSpeed) {
             maxSpeed = currentForwardSpeed;
         }
@@ -167,7 +166,7 @@ public class DriveSubsystem extends SubsystemBase {
         logLeft.append(wheels.leftMeters);
         logRight.append(wheels.rightMeters);
         logAverage.append(getAverageMeters());
-        logAngle.append(getAverageMeters());
+        logAngle.append(gyro.getAngle());
 
         SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
         SmartDashboard.putNumber("Drive/Right Meters", wheels.rightMeters);
@@ -194,17 +193,19 @@ public class DriveSubsystem extends SubsystemBase {
 
     public double getAverageMeters()
     {
-        return (wheels.leftMeters + wheels.rightMeters)/2;
+        double leftMeters = leftEncoder.getPosition() * Measurements.metersPerMotorRotation;
+        double rightMeters = rightEncoder.getPosition() * Measurements.metersPerMotorRotation;
+        return (leftMeters + rightMeters) / 2.0;
     }
 
     public double getLeftMeters()
     {
-        return wheels.leftMeters;
+        return leftEncoder.getPosition() * Measurements.metersPerMotorRotation;
     }
 
     public double getRightMeters()
     {
-        return wheels.rightMeters;
+        return rightEncoder.getPosition() * Measurements.metersPerMotorRotation;
     }
 
     public double getGyroValue()
@@ -228,13 +229,10 @@ public class DriveSubsystem extends SubsystemBase {
         leftEncoder.setPosition(0);
         rightEncoder.setPosition(0);
 
-        wheels.leftMeters = 0;
-        wheels.rightMeters = 0;
-
         gyro.reset();
 
         estimator.resetPosition(
-            Rotation2d.fromDegrees(gyro.getAngle()), wheels, newPose);
+            Rotation2d.fromDegrees(gyro.getAngle()), new DifferentialDriveWheelPositions(0,  0), newPose);
     }
 
     public ChassisSpeeds getRobotRelativeSpeeds()

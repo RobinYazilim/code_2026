@@ -108,6 +108,8 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         if (autoChooser != null)
         {
+            PathPlannerAuto auto = autoChooser.getSelected();
+
             return autoChooser.getSelected();
         }
         if (auto != null)
