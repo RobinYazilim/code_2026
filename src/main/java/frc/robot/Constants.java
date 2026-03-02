@@ -13,7 +13,15 @@ public class Constants {
 
     public static final class Limits {
         public static final int voltageLimit = 12;
-        public static final int motorCurrentLimit = 64;
+        public static final int motorCurrentLimit = 40; 
+        /*abi bunu değiştirmeyin 
+        fiziksel sigorta 40 amper sigorta kendi kendine patlasın
+        istemeyiz ---@yamuk */ 
+        
+        /*genel motorların limitlerini motoru daha hızlı çalıştıracam
+        diye değiştirmeyin, bu limitler fiziksel olarak motorun zarar
+        görmemesi için var ve genel ikinci önlem olarak sigortalatde var PDH'Te
+        --@yamuk ve efe*/
         public static final double clampDriveSpeedLimit = 0.25;
         public static final double clampShootSpeedLimit = 0.85;
         public static final double clampIntakeSpeedLimit = 0.45;
