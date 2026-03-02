@@ -89,6 +89,16 @@ public class DriveMetersCommand extends Command {
 
         driveSub.tankDrive(leftOutput, rightOutput);
         logSetpoint.append(meters);
+
+        
+        System.err.println("==============================");
+        System.err.println("Drive meters command is running");
+        System.err.println("Forward Speed: " + forwardSpeed);
+        System.err.println("==============================");
+
+
+
+        
     }
 
     @Override
