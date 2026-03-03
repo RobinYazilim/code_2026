@@ -6,6 +6,9 @@ import frc.robot.Constants.Motors;
 /* kitbot'da burayı import static yapmislar.
 + drive constants shooter constants diye ayırsak daha rahat olmaz mı? */
 
+import org.opencv.core.Mat;
+import org.photonvision.EstimatedRobotPose;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -18,13 +21,17 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
@@ -99,12 +106,6 @@ public class DriveSubsystem extends SubsystemBase {
         rightLeader.configure(rightLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         leftFollower.configure(leftFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         rightFollower.configure(rightFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-        leftLeader.setCANTimeout(250);
-        rightLeader.setCANTimeout(250);
-        leftFollower.setCANTimeout(250);
-        rightFollower.setCANTimeout(250);
-
 
         drive = new DifferentialDrive(leftLeader, rightLeader);
         kinematics = new DifferentialDriveKinematics(Measurements.distBetweenWheels);
@@ -190,6 +191,48 @@ public class DriveSubsystem extends SubsystemBase {
     {
         drive.tankDrive(left, right);
     }
+
+    public void addVisionMeasurement(EstimatedRobotPose visionPose)
+    {
+        Pose3d pose = visionPose.estimatedPose;
+        boolean isSafeZHeight = Math.abs(pose.getZ()) < 0.25;
+        boolean isWithinFieldBounds = pose.getX() >= 0 && pose.getX() <= 16.54
+                                   && pose.getY() >= 0 && pose.getY() <= 8.21;
+        
+        if (!isSafeZHeight || !isWithinFieldBounds)
+        {
+            return; // cop gibi measuyrement olmus harbi saha disi
+        }
+        
+        if (visionPose.targetsUsed.size() == 1)
+        {
+            double ambuguity = visionPose.targetsUsed.get(0).getPoseAmbiguity();
+            if (ambuguity > 0.2 || ambuguity == -1)
+            {
+                return; // yine cop
+            }
+        }
+
+        double averageDist = 0;
+        for (var target : visionPose.targetsUsed)
+        {
+            averageDist += target.getBestCameraToTarget().getTranslation().getNorm();
+        }
+        averageDist /= visionPose.targetsUsed.size();
+
+        Vector<N3> dynamicStandardDeviationVector;
+        if (visionPose.targetsUsed.size() > 0)
+        {
+            dynamicStandardDeviationVector = VecBuilder.fill(0.1, 0.1, Math.toRadians(5));
+        }
+        else 
+        {
+            double trust = 1.0 + (averageDist * 0.5);
+            dynamicStandardDeviationVector = VecBuilder.fill(0.5 * trust, 0.5 * trust, Math.toRadians(30*trust)); // furoozin olafin pienciisi: https://upload.wikimedia.org/wikipedia/en/6/6d/Olaf_from_Disney%27s_Frozen.png
+        }
+        estimator.addVisionMeasurement(pose.toPose2d(), visionPose.timestampSeconds, dynamicStandardDeviationVector);
+    }
+    
 
     public double getAverageMeters()
     {
