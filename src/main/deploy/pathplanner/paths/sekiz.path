@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 2.8098858773181172,
+        "y": 6.1245934379457925
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.9522111269614832,
-        "y": 6.719771754636234
+        "x": 3.7026533523537797,
+        "y": 6.551569186875891
       },
       "prevControl": {
-        "x": 1.9522111269614832,
-        "y": 6.719771754636234
+        "x": 2.9353352337867755,
+        "y": 6.551569186875891
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "ShootAllBalls",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
