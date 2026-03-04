@@ -6,6 +6,8 @@ import frc.robot.Constants.Motors;
 /* kitbot'da burayı import static yapmislar.
 + drive constants shooter constants diye ayırsak daha rahat olmaz mı? */
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import org.opencv.core.Mat;
 import org.photonvision.EstimatedRobotPose;
 
@@ -40,6 +42,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.ctre.phoenix6.hardware.Pigeon2;
+
 
 public class DriveSubsystem extends SubsystemBase {
     private final SparkMax leftLeader;
@@ -52,11 +56,23 @@ public class DriveSubsystem extends SubsystemBase {
     
     private final ADXRS450_Gyro gyro;
 
+
+    private final Pigeon2 piegonWOW;
+    //piegon docs bunlar bakmak isteyenlere:
+    //https://v6.docs.ctr-electronics.com/en/stable/ -->BU 6 bizimki
+    //https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/Pigeon2.html 
+    //https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/pigeon2/index.html?utm_source=
+
+
+
     private final DifferentialDrive drive;
     private final DifferentialDriveKinematics kinematics;
     //private final DifferentialDriveWheelPositions wheels;
     private final DifferentialDrivePoseEstimator estimator;
     private final Pose2d pose;
+
+    //private final DifferentialDrivePoseEstimator estimator2;
+    //private final Pose2d pose2;
 
     // log isi
     private final DoubleLogEntry logLeft = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Left Meters");
@@ -81,6 +97,8 @@ public class DriveSubsystem extends SubsystemBase {
         gyro = new ADXRS450_Gyro();
         gyro.calibrate();
         gyro.reset();
+
+        piegonWOW=new Pigeon2(1,"rio"); //bizimki can olacak
 
         SparkMaxConfig leftLeaderConfig = new SparkMaxConfig();
         SparkMaxConfig rightLeaderConfig = new SparkMaxConfig();
@@ -110,9 +128,19 @@ public class DriveSubsystem extends SubsystemBase {
         drive = new DifferentialDrive(leftLeader, rightLeader);
         kinematics = new DifferentialDriveKinematics(Measurements.distBetweenWheels);
         DifferentialDriveWheelPositions wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition()*Measurements.metersPerMotorRotation, rightEncoder.getPosition()*Measurements.metersPerMotorRotation);
+       
+        /*Eski gyro ile olan pose estimator:
         pose = new Pose2d(0, 0, new Rotation2d(gyro.getAngle()));
         estimator = new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(gyro.getAngle()), wheels.leftMeters, wheels.rightMeters, pose);
+        */
 
+        //piegon 
+        pose = new Pose2d(0, 0, piegonWOW.getRotation2d());
+        estimator = new DifferentialDrivePoseEstimator(kinematics, piegonWOW.getRotation2d(), wheels.leftMeters, wheels.rightMeters, pose);
+        
+        double yawDegrees = piegonWOW.getYaw().getValueAsDouble();
+        Rotation2d rotation = Rotation2d.fromDegrees(yawDegrees);
+        
         DCMotor driveMotor = DCMotor.getNEO(2).withReduction(Measurements.gearRatio);
         
         ModuleConfig moduleConfig = new ModuleConfig(
@@ -154,7 +182,8 @@ public class DriveSubsystem extends SubsystemBase {
     public void periodic() {
         DifferentialDriveWheelPositions wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition() * Measurements.metersPerMotorRotation, rightEncoder.getPosition() * Measurements.metersPerMotorRotation);
 
-        estimator.update(Rotation2d.fromDegrees(gyro.getAngle()), wheels);
+        //estimator.update(Rotation2d.fromDegrees(gyro.getAngle()), wheels); --> eski
+        estimator.update(piegonWOW.getRotation2d(), wheels);
 
         double currentForwardSpeed = Math.abs(getRobotRelativeSpeeds().vxMetersPerSecond);
         
@@ -167,12 +196,15 @@ public class DriveSubsystem extends SubsystemBase {
         logLeft.append(wheels.leftMeters);
         logRight.append(wheels.rightMeters);
         logAverage.append(getAverageMeters());
-        logAngle.append(gyro.getAngle());
+        //logAngle.append(gyro.getAngle());
+        logAngle.append(piegonWOW.getYaw().getValueAsDouble());
+
 
         SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
         SmartDashboard.putNumber("Drive/Right Meters", wheels.rightMeters);
         SmartDashboard.putNumber("Drive/Average Meters", getAverageMeters());
-        SmartDashboard.putNumber("Drive/Gyro Angle", gyro.getAngle());
+        SmartDashboard.putNumber("Drive/Gyro Angle eski", gyro.getAngle());
+        SmartDashboard.putNumber("Drive/Gyro Angle, piegon",piegonWOW.getYaw().getValueAsDouble());
 
         Pose2d currentPose = getPose();
         SmartDashboard.putNumberArray("Odometry/Robot Pose", new double[] {
@@ -181,6 +213,7 @@ public class DriveSubsystem extends SubsystemBase {
             currentPose.getRotation().getDegrees()
         });
     }
+    //merhaba
 
     public void drive(double forward, double rotation)
     {
@@ -253,15 +286,19 @@ public class DriveSubsystem extends SubsystemBase {
 
     public double getGyroValue()
     {
-        return gyro.getAngle();
+        //return gyro.getAngle();
+        return piegonWOW.getYaw().getValueAsDouble();
     }
 
     public void resetGyro()
     {
         gyro.reset();
+        piegonWOW.reset();
     }
 
     // BUNLARI ASLA SILMEYIN VE ISIMLERINI DEGISTIRMEYIN PATHPLANNER ICIN GEREKLI
+
+    //gyro için bişeler değiştirmis olabilirim ama yanlış yapmıssam diye eskileri silmedim yamuk
     public Pose2d getPose()
     {
         return estimator.getEstimatedPosition();
@@ -273,10 +310,15 @@ public class DriveSubsystem extends SubsystemBase {
         rightEncoder.setPosition(0);
 
         gyro.reset();
+        piegonWOW.reset();
 
-        estimator.resetPosition(
+        /*estimator.resetPosition(
             Rotation2d.fromDegrees(gyro.getAngle()), new DifferentialDriveWheelPositions(0,  0), newPose);
-    }
+    */
+        estimator.resetPosition(
+            Rotation2d.fromDegrees(piegonWOW.getYaw().getValueAsDouble()), new DifferentialDriveWheelPositions(0,  0), newPose);
+
+}
 
     public ChassisSpeeds getRobotRelativeSpeeds()
     {
