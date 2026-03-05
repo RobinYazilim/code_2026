@@ -17,11 +17,10 @@ public class DriveMetersCommand extends Command {
 
     private final double meters;
     private double startMeters;
-    private double startAngle;
+    private double angle = 0;
 
     private final DoubleLogEntry logSetpoint = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Setpoint");
 
-    double angle = 0;                                                                                                                                                                                           
 
     public DriveMetersCommand(double meters, DriveSubsystem driveSub)
     {
