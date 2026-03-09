@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 3.6767760342368048,
+        "y": 5.296519258202568
       },
       "prevControl": {
-        "x": 2.2326818814329954,
-        "y": 7.0
+        "x": 2.9094579156698,
+        "y": 5.296519258202568
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "ShootAllBalls",
-      "waypointRelativePos": 0,
+      "waypointRelativePos": 0.8210668467251857,
       "endWaypointRelativePos": null,
       "command": null
     }

@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -16,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
-import frc.robot.commands.DriveMetersCommand;
+import frc.robot.commands.*;
 
 import frc.robot.subsystems.BallSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -46,8 +47,14 @@ public class RobotContainer {
         
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
+        new EventTrigger("ShootAllBalls").onTrue(new ShootAllBalls(ballSub));
+        new EventTrigger("IntakeBalls").onTrue(new IntakeCommand(ballSub));
+
+
         configureBindings();
         auto = loadAutos();
+
+        SmartDashboard.putNumber("PowerMult", 1);
 
         SmartDashboard.putNumber("Tune-Dist_kP", 0.9);
         SmartDashboard.putNumber("Tune-Dist_kI", 0.05);
