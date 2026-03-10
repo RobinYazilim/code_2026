@@ -20,6 +20,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -31,12 +33,15 @@ import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StructLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.signals.MeasurementHealthValue;
 
 
 public class DriveSubsystem extends SubsystemBase {
@@ -47,9 +52,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final RelativeEncoder leftEncoder;
     private final RelativeEncoder rightEncoder;
-    
-    // private final ADXRS450_Gyro gyro;
 
+    private final PIDController leftPID = new PIDController(1.5, 0.0, 0.0);
+    private final PIDController rightPID = new PIDController(1.5, 0.0, 0.0);
+    
+    private final SimpleMotorFeedforward feedforward;
 
     @SuppressWarnings("unused")
     private final Pigeon2 piegonWOW;
@@ -66,12 +73,14 @@ public class DriveSubsystem extends SubsystemBase {
     private final DifferentialDriveKinematics kinematics;
     private final DifferentialDrivePoseEstimator estimator;
     private final Pose2d pose;
+    private final Field2d field;
 
     // log isi
     private final DoubleLogEntry logLeft = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Left Meters");
     private final DoubleLogEntry logRight = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Right Meters");
     private final DoubleLogEntry logAverage = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Average Meters");
     private final DoubleLogEntry logAngle = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Gyro Angle");
+    private final StructLogEntry<Pose2d> logPose = StructLogEntry.create(DataLogManager.getLog(), "Drive/Robot Pose", Pose2d.struct);
 
     private double maxSpeed = 0.0;
 
@@ -106,6 +115,12 @@ public class DriveSubsystem extends SubsystemBase {
         leftFollowerConfig.smartCurrentLimit(Limits.motorCurrentLimit);
         rightFollowerConfig.smartCurrentLimit(Limits.motorCurrentLimit);
 
+        leftFollowerConfig.signals.primaryEncoderPositionPeriodMs(500);
+        leftFollowerConfig.signals.primaryEncoderVelocityPeriodMs(500);
+        rightFollowerConfig.signals.primaryEncoderPositionPeriodMs(500);
+        rightFollowerConfig.signals.primaryEncoderVelocityPeriodMs(500);
+        // optimizasyon isi
+
         leftFollowerConfig.follow(leftLeader);
         rightFollowerConfig.follow(rightLeader);
 
@@ -119,12 +134,15 @@ public class DriveSubsystem extends SubsystemBase {
         drive = new DifferentialDrive(leftLeader, rightLeader);
         kinematics = new DifferentialDriveKinematics(Measurements.distBetweenWheels);
         DifferentialDriveWheelPositions wheels = new DifferentialDriveWheelPositions(leftEncoder.getPosition()*Measurements.metersPerMotorRotation, rightEncoder.getPosition()*Measurements.metersPerMotorRotation);
-       
+        feedforward = new SimpleMotorFeedforward(0.3, 3.4285714286);
 
         // piegon 
         pose = new Pose2d(0, 0, gyro.getRotation2d());
         estimator = new DifferentialDrivePoseEstimator(kinematics, pose.getRotation(), wheels.leftMeters, wheels.rightMeters, pose);
-        
+
+        field = new Field2d();
+        SmartDashboard.putData("Field", field);
+
         DCMotor driveMotor = DCMotor.getNEO(2).withReduction(Measurements.gearRatio);
         
         ModuleConfig moduleConfig = new ModuleConfig(
@@ -184,6 +202,7 @@ public class DriveSubsystem extends SubsystemBase {
         logRight.append(wheels.rightMeters);
         logAverage.append(getAverageMeters());
         logAngle.append(currentRotation.getDegrees());
+        logPose.append(getPose());
 
 
         SmartDashboard.putNumber("Drive/Left Meters", wheels.leftMeters);
@@ -191,12 +210,7 @@ public class DriveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Drive/Average Meters", getAverageMeters());
         SmartDashboard.putNumber("Drive/Gyro Angle", currentRotation.getDegrees());
 
-        Pose2d currentPose = getPose();
-        SmartDashboard.putNumberArray("Odometry/Robot Pose", new double[] {
-            currentPose.getX(),
-            currentPose.getY(),
-            currentPose.getRotation().getDegrees()
-        });
+        field.setRobotPose(getPose());
     }
     // merhaba
     // bay bay 
@@ -213,6 +227,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void addVisionMeasurement(EstimatedRobotPose visionPose)
     {
+        if (Math.abs(gyro.getAngularVelocityZDevice().getValueAsDouble()) > 180.0)
+        {
+            return; // fazla hizli donuyo motion blur falan
+        }
         Pose3d pose = visionPose.estimatedPose;
         boolean isSafeZHeight = Math.abs(pose.getZ()) < 0.25;
         boolean isWithinFieldBounds = pose.getX() >= 0 && pose.getX() <= 16.54
@@ -240,7 +258,7 @@ public class DriveSubsystem extends SubsystemBase {
         averageDist /= visionPose.targetsUsed.size();
 
         Vector<N3> dynamicStandardDeviationVector;
-        if (visionPose.targetsUsed.size() > 0)
+        if (visionPose.targetsUsed.size() > 2)
         {
             dynamicStandardDeviationVector = VecBuilder.fill(0.1, 0.1, Math.toRadians(5));
         }
@@ -252,6 +270,17 @@ public class DriveSubsystem extends SubsystemBase {
         estimator.addVisionMeasurement(pose.toPose2d(), visionPose.timestampSeconds, dynamicStandardDeviationVector);
     }
     
+    private double[] desaturateVoltages(double leftVolts, double rightVolts, double maxVoltage) {
+        double maxAbsVoltage = Math.max(Math.abs(leftVolts), Math.abs(rightVolts));
+        
+        if (maxAbsVoltage > maxVoltage) {
+            double scale = maxVoltage / maxAbsVoltage;
+            leftVolts *= scale;
+            rightVolts *= scale;
+        }
+        
+        return new double[] {leftVolts, rightVolts};
+    }
 
     public double getAverageMeters()
     {
@@ -294,7 +323,7 @@ public class DriveSubsystem extends SubsystemBase {
         rightEncoder.setPosition(0);
 
         estimator.resetPosition(
-            Rotation2d.fromDegrees(gyro.getRotation2d().getDegrees()), new DifferentialDriveWheelPositions(0,  0), newPose);
+            gyro.getRotation2d(), new DifferentialDriveWheelPositions(0,  0), newPose);
 }
 
     public ChassisSpeeds getRobotRelativeSpeeds()
@@ -315,11 +344,20 @@ public class DriveSubsystem extends SubsystemBase {
         DifferentialDriveWheelSpeeds targetWheelSpeeds = kinematics.toWheelSpeeds(chassisSpeeds);
 
         targetWheelSpeeds.desaturate(Limits.maxPhysicalSpeedMetersPerSecond);
-        double leftVolts = (targetWheelSpeeds.leftMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
-        double rightVolts = (targetWheelSpeeds.rightMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
+        double leftFeedF = feedforward.calculate(targetWheelSpeeds.leftMetersPerSecond);
+        double rightFeedF = feedforward.calculate(targetWheelSpeeds.rightMetersPerSecond);
+        // double leftVolts = (targetWheelSpeeds.leftMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
+        // double rightVolts = (targetWheelSpeeds.rightMetersPerSecond / Limits.maxPhysicalSpeedMetersPerSecond) * Limits.voltageLimit;
 
-        leftVolts = MathUtil.clamp(leftVolts, -Limits.voltageLimit, Limits.voltageLimit);
-        rightVolts = MathUtil.clamp(rightVolts, -Limits.voltageLimit, Limits.voltageLimit);
+        double currentLeftMpS = (leftEncoder.getVelocity() / 60) * Measurements.metersPerMotorRotation;
+        double currentRightMpS = (leftEncoder.getVelocity() / 60) * Measurements.metersPerMotorRotation;
+
+        double leftVolts = leftFeedF + leftPID.calculate(currentLeftMpS, targetWheelSpeeds.leftMetersPerSecond);
+        double rightVolts = rightFeedF + rightPID.calculate(currentRightMpS, targetWheelSpeeds.rightMetersPerSecond);
+
+        double[] desaturatedVoltages = desaturateVoltages(leftVolts, rightVolts, Limits.voltageLimit);
+        leftVolts = desaturatedVoltages[0];
+        rightVolts = desaturatedVoltages[1];
 
         leftLeader.setVoltage(leftVolts);
         rightLeader.setVoltage(rightVolts);
