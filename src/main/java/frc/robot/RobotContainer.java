@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
 import frc.robot.commands.*;
+todo ama comment degil ki error oldugunu gorup endiselenip sonra ciddili bakak
+acc filter şeysinmden
 
 import frc.robot.subsystems.BallSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -36,6 +38,9 @@ public class RobotContainer {
         driveSub = new DriveSubsystem();
         ballSub = new BallSubsystem();
         controller = new CommandPS4Controller(IDs.controllerPort);
+        
+        NamedCommands.registerCommand("ShootAllBalls", new ShootAllBalls(ballSub));
+        NamedCommands.registerCommand("IntakeBalls", new IntakeCommand(ballSub));
 
         autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier(
         (stream) -> isCompetition
@@ -48,8 +53,6 @@ public class RobotContainer {
         // new EventTrigger("ShootAllBalls").onTrue(new ShootAllBalls(ballSub));
         // new EventTrigger("IntakeBalls").onTrue(new IntakeCommand(ballSub));
         // bu harbi cok eski ve kotu bi sey named command calistiriyoz zaten
-        NamedCommands.registerCommand("ShootAllBalls", new ShootAllBalls(ballSub));
-        NamedCommands.registerCommand("IntakeBalls", new IntakeCommand(ballSub));
 
         configureBindings();
 
@@ -108,7 +111,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        
+        System.err.println(NamedCommands.hasCommand("ShootAllBalls"));
+
         return autoChooser.getSelected();
         //return new DriveMetersCommand(1, driveSub);
     }

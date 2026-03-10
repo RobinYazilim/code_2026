@@ -28,7 +28,7 @@ public class Constants {
 
         public static final double maxPhysicalSpeedMetersPerSecond = 3.8;
 
-        public static final double joystickSpeedLimit = 0.6;
+        public static final double joystickSpeedLimit = 0.90;
     }
 
     public static final class Measurements {
