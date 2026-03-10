@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.MathUtil;
@@ -27,7 +26,6 @@ public class RobotContainer {
     private final BallSubsystem ballSub;
     private final CommandPS4Controller controller;
 
-    private final PathPlannerAuto auto;
     private final SendableChooser<Command> autoChooser;
 
 
@@ -52,7 +50,6 @@ public class RobotContainer {
 
 
         configureBindings();
-        auto = loadAutos();
 
         SmartDashboard.putNumber("PowerMult", 1);
 
@@ -64,10 +61,6 @@ public class RobotContainer {
         SmartDashboard.putNumber("Tune-Head_kI", 0.0);
         SmartDashboard.putNumber("Tune-Head_kD", 0.0);
     
-    }
-
-    private PathPlannerAuto loadAutos() {
-        return new PathPlannerAuto("abc");
     }
 
     private void configureBindings() {
@@ -113,15 +106,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        if (autoChooser != null)
-        {
-            return autoChooser.getSelected();
-        }
-        if (auto != null)
-        {
-            System.err.println("got das auto");
-            return auto;
-        }
-        return new DriveMetersCommand(1, driveSub);
+        
+        return autoChooser.getSelected();
+        //return new DriveMetersCommand(1, driveSub);
     }
 }
