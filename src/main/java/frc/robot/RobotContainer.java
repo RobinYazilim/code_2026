@@ -5,7 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -45,9 +45,11 @@ public class RobotContainer {
         
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        new EventTrigger("ShootAllBalls").onTrue(new ShootAllBalls(ballSub));
-        new EventTrigger("IntakeBalls").onTrue(new IntakeCommand(ballSub));
-
+        // new EventTrigger("ShootAllBalls").onTrue(new ShootAllBalls(ballSub));
+        // new EventTrigger("IntakeBalls").onTrue(new IntakeCommand(ballSub));
+        // bu harbi cok eski ve kotu bi sey named command calistiriyoz zaten
+        NamedCommands.registerCommand("ShootAllBalls", new ShootAllBalls(ballSub));
+        NamedCommands.registerCommand("IntakeBalls", new IntakeCommand(ballSub));
 
         configureBindings();
 
