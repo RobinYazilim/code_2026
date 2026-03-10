@@ -5,8 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -27,7 +26,6 @@ public class RobotContainer {
     private final BallSubsystem ballSub;
     private final CommandPS4Controller controller;
 
-    private final PathPlannerAuto auto;
     private final SendableChooser<Command> autoChooser;
 
 
@@ -47,12 +45,13 @@ public class RobotContainer {
         
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        new EventTrigger("ShootAllBalls").onTrue(new ShootAllBalls(ballSub));
-        new EventTrigger("IntakeBalls").onTrue(new IntakeCommand(ballSub));
-
+        // new EventTrigger("ShootAllBalls").onTrue(new ShootAllBalls(ballSub));
+        // new EventTrigger("IntakeBalls").onTrue(new IntakeCommand(ballSub));
+        // bu harbi cok eski ve kotu bi sey named command calistiriyoz zaten
+        NamedCommands.registerCommand("ShootAllBalls", new ShootAllBalls(ballSub));
+        NamedCommands.registerCommand("IntakeBalls", new IntakeCommand(ballSub));
 
         configureBindings();
-        auto = loadAutos();
 
         SmartDashboard.putNumber("PowerMult", 1);
 
@@ -64,10 +63,6 @@ public class RobotContainer {
         SmartDashboard.putNumber("Tune-Head_kI", 0.0);
         SmartDashboard.putNumber("Tune-Head_kD", 0.0);
     
-    }
-
-    private PathPlannerAuto loadAutos() {
-        return new PathPlannerAuto("abc");
     }
 
     private void configureBindings() {
@@ -113,15 +108,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        if (autoChooser != null)
-        {
-            return autoChooser.getSelected();
-        }
-        if (auto != null)
-        {
-            System.err.println("got das auto");
-            return auto;
-        }
-        return new DriveMetersCommand(1, driveSub);
+        
+        return autoChooser.getSelected();
+        //return new DriveMetersCommand(1, driveSub);
     }
 }
