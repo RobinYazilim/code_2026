@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
-    // https://www.weser-kurier.de/stadt-delmenhorst/sport/1-fussball-kreisklasse-mete-doener-wird-trainer-beim-delmenhorster-tb-doc7m1p2vzycnsciwsd4l8
+    // https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl3tFaA2l0cSSHA3wswgcbWRCeXJ5RWocpng&s
     private final SparkMax leftFront;
     private final SparkMax rightFront;
     private final SparkMax leftBack;
