@@ -95,6 +95,7 @@ public class DriveSubsystem extends SubsystemBase {
         rightEncoder.setPosition(0);
 
         gyro = new Pigeon2(27);
+        gyro.reset();
         piegonWOW = gyro; // piegonWOW gyro ile aynı şeyi ifade ediyor, kodun geri kalanında gyro olarak kullanacağız
         // manevi anlamda orada 
 

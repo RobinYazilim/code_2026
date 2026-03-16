@@ -16,8 +16,9 @@ public class DriveMetersCommand extends Command {
     private final DriveSubsystem driveSub;
 
     private final double meters;
+    private final double angle;
     private double startMeters;
-    private double angle = 0;
+    private double startAngle;
 
     private final DoubleLogEntry logSetpoint = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Setpoint");
 
@@ -25,36 +26,35 @@ public class DriveMetersCommand extends Command {
     public DriveMetersCommand(double meters, DriveSubsystem driveSub)
     {
         this.meters = meters;
+        this.angle = 0;
+
         this.driveSub = driveSub;
 
         addRequirements(driveSub);
-
-        angle = driveSub.getGyroValue();
 
         double distKp = 0.7; 
         double distKi = 0.0;
         double distKd = 0.05;
         distancePid = new PIDController(distKp, distKi, distKd);
-        distancePid.setTolerance(0.03, 0.1);
+        distancePid.setTolerance(0.01);
 
-        double headKp = 0.04;
-        double headKi = 0.0;
+        double headKp = 0.02;
+        double headKi = 0.01;
         double headKd = 0.0;
         headingPid = new PIDController(headKp, headKi, headKd);
+        headingPid.setTolerance(5);
 
-        }
+    }
 
     @Override
     public void initialize()
     {
         startMeters = driveSub.getAverageMeters();
+        startAngle = driveSub.getGyroValue();
         
         distancePid.reset();
         headingPid.reset();
-
-        driveSub.resetGyro();
         
-        angle = driveSub.getGyroValue();
 
     }
 
@@ -62,32 +62,49 @@ public class DriveMetersCommand extends Command {
     public void execute()
     {
 
-        double distKp = SmartDashboard.getNumber("Tune-Dist_kP", 0.7);
-        double distKi = SmartDashboard.getNumber("Tune-Dist_kI", 0.0);
+        double distKp = SmartDashboard.getNumber("Tune-Dist_kP", 0.9);
+        double distKi = SmartDashboard.getNumber("Tune-Dist_kI", 0);
         double distKd = SmartDashboard.getNumber("Tune-Dist_kD", 0.05);
 
-        double headKp = SmartDashboard.getNumber("Tune-Head_kP", 0.04);
-        double headKi = SmartDashboard.getNumber("Tune-Head_kI", 0.0);
-        double headKd = SmartDashboard.getNumber("Tune-Head_kD", 0.0);
-
         distancePid.setPID(distKp, distKi, distKd);
-        headingPid.setPID(headKp, headKi, headKd);
 
         double average = driveSub.getAverageMeters() - startMeters;
-        double rotation = driveSub.getGyroValue() - angle;
+        double rotation = driveSub.getGyroValue() - startAngle;
 
         double forwardSpeed = distancePid.calculate(average, meters);
         
         double turnSpeed = headingPid.calculate(rotation, angle);
         
-        double leftOutput = forwardSpeed + turnSpeed;
-        double rightOutput = forwardSpeed - turnSpeed;
+        double leftOutput = forwardSpeed - turnSpeed;
+        double rightOutput = forwardSpeed + turnSpeed;
 
-        leftOutput = MathUtil.clamp(leftOutput, -Limits.clampDriveSpeedLimit, Limits.clampDriveSpeedLimit);
-        rightOutput = MathUtil.clamp(rightOutput, -Limits.clampDriveSpeedLimit, Limits.clampDriveSpeedLimit);
+        double[] desd = desaturateOutput(leftOutput, rightOutput);
+        leftOutput = desd[0];
+        rightOutput = desd[1];
+        
 
         driveSub.tankDrive(leftOutput, rightOutput);
         logSetpoint.append(meters);
+
+        SmartDashboard.putNumber("Drive/meters Setpoint", meters);
+        SmartDashboard.putNumber("Drive/meters traveled", average);
+
+        SmartDashboard.putNumber("Drive/gyro Setpoint", angle);
+        SmartDashboard.putNumber("Drive/gyro turned", rotation);
+
+    }
+    
+    private double[] desaturateOutput(double left, double right)
+    {
+        double maxAbs = Math.max(Math.abs(left), Math.abs(right));
+        
+        if (maxAbs > Limits.clampDriveSpeedLimit) {
+            double scale = Limits.clampDriveSpeedLimit / maxAbs;
+            left *= scale;
+            right *= scale;
+        }
+        
+        return new double[] {left, right};
     }
 
     @Override

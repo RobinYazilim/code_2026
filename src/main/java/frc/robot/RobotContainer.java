@@ -56,12 +56,13 @@ public class RobotContainer {
         SmartDashboard.putNumber("PowerMult", 1);
 
         SmartDashboard.putNumber("Tune-Dist_kP", 0.9);
-        SmartDashboard.putNumber("Tune-Dist_kI", 0.05);
-        SmartDashboard.putNumber("Tune-Dist_kD", 0.1);
+        SmartDashboard.putNumber("Tune-Dist_kI", 0.13);
+        SmartDashboard.putNumber("Tune-Dist_kD", 0.5);
         
-        SmartDashboard.putNumber("Tune-Head_kP", 0.04);
+        SmartDashboard.putNumber("Tune-Head_kP", 0.4);
         SmartDashboard.putNumber("Tune-Head_kI", 0.0);
-        SmartDashboard.putNumber("Tune-Head_kD", 0.0);
+        SmartDashboard.putNumber("Tune-Head_kD", 0.05);
+        
     
     }
 

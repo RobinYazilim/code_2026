@@ -22,7 +22,7 @@ public class Constants {
         diye değiştirmeyin, bu limitler fiziksel olarak motorun zarar
         görmemesi için var ve genel ikinci önlem olarak sigortalatde var PDH'Te
         --@yamuk ve efe*/
-        public static final double clampDriveSpeedLimit = 0.25;
+        public static final double clampDriveSpeedLimit = 0.45;
         public static final double clampShootSpeedLimit = 0.85;
         public static final double clampIntakeSpeedLimit = 0.45;
 
