@@ -8,6 +8,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,8 +18,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.Constants.IDs;
 import frc.robot.Constants.Limits;
 import frc.robot.commands.*;
-todo ama comment degil ki error oldugunu gorup endiselenip sonra ciddili bakak
-acc filter şeysinmden
 
 import frc.robot.subsystems.BallSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -29,8 +28,6 @@ public class RobotContainer {
     private final CommandPS4Controller controller;
 
     private final SendableChooser<Command> autoChooser;
-
-
 
     public RobotContainer() {
         boolean isCompetition = true;
@@ -80,7 +77,7 @@ public class RobotContainer {
 
                     speed *= Limits.joystickSpeedLimit;
                     rotation *= Limits.joystickSpeedLimit;
-
+                                        
                     driveSub.drive(speed, rotation);
                 },
             driveSub));
@@ -109,8 +106,11 @@ public class RobotContainer {
                 )
             );
 
+        controller.cross().onTrue(new DriveMetersCommand(1, driveSub));
+        controller.circle().onTrue(new rotate90(driveSub));
 
-        controller
+
+        
     }
 
     public Command getAutonomousCommand() {

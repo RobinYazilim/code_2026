@@ -21,7 +21,7 @@ public class CameraSubsystem extends SubsystemBase {
     private final Consumer<EstimatedRobotPose> consumer;
 
     public static final String cameraName = "robinvision"; // TODO: degis bunlari svp pls plsp lspo lsokap lds 
-    public static final Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.5 ,0.5), new Rotation3d(0, 0 ,0));
+    public static final Transform3d robotToCam = new Transform3d(new Translation3d(0, 0.31 ,0.27), new Rotation3d(0, 0 ,0));
     public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
 

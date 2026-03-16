@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Limits;
 import frc.robot.subsystems.DriveSubsystem;
 
-public class DriveMetersCommand extends Command {
+public class rotate90 extends Command {
     private final PIDController distancePid;
     private final PIDController headingPid;
 
@@ -22,9 +22,9 @@ public class DriveMetersCommand extends Command {
     private final DoubleLogEntry logSetpoint = new DoubleLogEntry(DataLogManager.getLog(), "Drive/Setpoint");
 
 
-    public DriveMetersCommand(double meters, DriveSubsystem driveSub)
+    public rotate90(DriveSubsystem driveSub)
     {
-        this.meters = meters;
+        this.meters = 0;
         this.driveSub = driveSub;
 
         addRequirements(driveSub);
@@ -41,8 +41,10 @@ public class DriveMetersCommand extends Command {
         double headKi = 0.0;
         double headKd = 0.0;
         headingPid = new PIDController(headKp, headKi, headKd);
+        distancePid.setTolerance(0.03, 0.1);
 
-        }
+    }
+        
 
     @Override
     public void initialize()
@@ -52,9 +54,7 @@ public class DriveMetersCommand extends Command {
         distancePid.reset();
         headingPid.reset();
 
-        driveSub.resetGyro();
-        
-        angle = driveSub.getGyroValue();
+        angle = driveSub.getGyroValue() + ((double) 90);
 
     }
 
@@ -88,12 +88,22 @@ public class DriveMetersCommand extends Command {
 
         driveSub.tankDrive(leftOutput, rightOutput);
         logSetpoint.append(meters);
+
+        
+        System.err.println("==============================");
+        System.err.println("rotat 90 command is running");
+        System.err.println("Forward Speed: " + forwardSpeed);
+        System.err.println("==============================");
+
+
+
+        
     }
 
     @Override
     public boolean isFinished()
     {
-        return distancePid.atSetpoint();
+        return headingPid.atSetpoint();
     }
 
     @Override
