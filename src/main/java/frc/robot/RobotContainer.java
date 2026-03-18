@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.List;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -20,21 +22,27 @@ import frc.robot.Constants.Limits;
 import frc.robot.commands.*;
 
 import frc.robot.subsystems.BallSubsystem;
+import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.systems.ComboSystem;
 
 public class RobotContainer {
     private final DriveSubsystem driveSub;
     private final BallSubsystem ballSub;
+    private final CameraSubsystem cameraSub;
     private final CommandPS4Controller controller;
+    //private final ComboSystem comboSys;
 
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-        boolean isCompetition = true;
+        boolean isCompetition = false;
 
         driveSub = new DriveSubsystem();
         ballSub = new BallSubsystem();
+        cameraSub = new CameraSubsystem(driveSub::addVisionMeasurement);
         controller = new CommandPS4Controller(IDs.controllerPort);
+        //comboSys = new ComboSystem(controller);
         
         NamedCommands.registerCommand("ShootAllBalls", new ShootAllBalls(ballSub));
         NamedCommands.registerCommand("IntakeBalls", new IntakeCommand(ballSub));
@@ -52,8 +60,6 @@ public class RobotContainer {
         // bu harbi cok eski ve kotu bi sey named command calistiriyoz zaten
 
         configureBindings();
-
-        SmartDashboard.putNumber("PowerMult", 1);
 
         SmartDashboard.putNumber("Tune-Dist_kP", 0.9);
         SmartDashboard.putNumber("Tune-Dist_kI", 0.13);
@@ -106,6 +112,15 @@ public class RobotContainer {
                 ballSub
                 )
             );
+
+        /*
+        comboSys.registerCommand(
+            new StartEndCommand(() -> ballSub.runIntake(Limits.clampIntakeSpeedLimit),
+                () -> ballSub.runIntake(0),
+                ballSub),
+            "Square", "Up", "Down", "Down"
+        );
+        */
 
         controller.cross().onTrue(new DriveMetersCommand(1, driveSub));
         controller.circle().onTrue(new rotate90(driveSub));
