@@ -32,11 +32,11 @@ public class BallSubsystem extends SubsystemBase {
 
     public void runShooter(double speed) {        
         shooterMotor.set(speed); 
-        intakeMotor.set(speed);
+        intakeMotor.set(-speed);
     }
     
     public void runIntake(double speed) {
-        intakeMotor.set(speed);
+        intakeMotor.set(-speed);
         shooterMotor.set(-speed);
     }
 }
