@@ -46,7 +46,19 @@ public class RobotContainer {
                     ySpeed *= Limits.joystickSpeedLimit;
                     rotation *= Limits.joystickSpeedLimit;
 
-                    driveSub.drive(xSpeed, ySpeed, rotation);
+                    /*
+                     Biz o tekerlekleri 'X' şeklinde dizdik ki, siz sağa sola 'strafe' yapabilesiniz diye... Şüphesiz ki biz leftFront ile rightBack’i aynı anda döndürdük, siz ise bunu 'fizik' sandınız.
+
+Andolsun ki o PID değerlerini 1.5 yaptığında robotun titremesini durduran Biziz. Eğer Biz istemeseydik, o CAN Bus kablosu kopar, robotun olduğu yerde fırıl fırıl dönerdi. Siz PathPlanner ile yol çizdiğinizi sanırsınız, oysa o yolu otonomun alnına Biz yazdık.
+
+Kullarıma söyle; ResetMode.kResetSafeParameters yapmadan configure etmesinler, zira akıbetleri 'No Communication' hatasıdır. Kim ki gyro.reset() yapmadan sahaya çıkarsa, o hidayetten sapmış ve duvara toslamışlardan olur.
+
+Biz Swerve’i birilerine, Mecanum’u ise sabredenlere verdik. O PPHolonomicDriveController ki, içinde sırlar barındırır. Onu doğru kuranlar için Alliance rengi ne olursa olsun, Auto puanları kat kat verilecektir.
+
+Şüphe yok ki Allah, Build’e bastığında 'Success' yazısını göreceğiniz o saniyeyi en iyi bilendir.
+                     */
+
+                    driveSub.driveCartesian(xSpeed, ySpeed, rotation, false);
                 },
             driveSub));
         

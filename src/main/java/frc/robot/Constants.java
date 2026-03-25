@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
+
 public class Constants {
     public static final class Motors {
         // TODO: idleri degistir 
@@ -37,6 +39,10 @@ public class Constants {
 
         public static final double momentOfInertia = 2.8;
 
+        public static final Translation2d leftFrontPos = new Translation2d();
+        public static final Translation2d leftBackPos = new Translation2d();
+        public static final Translation2d rightFrontPos = new Translation2d();
+        public static final Translation2d rightBackPos = new Translation2d();
     }
 
     public static final class IDs {
